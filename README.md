@@ -1,6 +1,6 @@
 # 小鱼干时薪换算器
 
-Vue 3 Composition API + JavaScript + Vite 单页项目，参考 PRD 与粉黄手绘风移动端原型。仅使用 Vue 作为生产依赖，无后端、账号或外部字体依赖。
+原生 HTML + CSS + JavaScript 单页项目，参考 PRD 与粉黄手绘风移动端原型。不使用 Vue 或其他前端框架，无生产依赖、后端、账号或外部字体依赖。Vite 仅用于本地开发和打包。
 
 ## 启动
 
@@ -12,6 +12,8 @@ npm run dev
 ```
 
 打开终端显示的本地地址（默认 http://127.0.0.1:5173）。
+
+使用期间请保持开发服务器所在的终端运行；关闭终端或按 Ctrl+C 会停止服务。HTML 和 JavaScript 模块需要通过 HTTP 服务访问，请勿直接双击 `index.html`。构建后的 `dist/` 可部署到静态网站服务器。
 
 ```sh
 npm test
@@ -33,7 +35,8 @@ npm run preview
 
 ## 文件
 
-- `src/App.vue`：表单、收入保存、结果和导出交互。
+- `index.html`：完整页面结构，包括表单、结果区和图片预览。
+- `src/main.js`：通过原生 DOM 和事件处理实现收入保存、表单校验、换算和导出交互。
 - `src/styles.css`：粉黄配色、爪印底纹和描边样式。
 - `src/calculator.js`：输入校验、恢复设置和时长计算。
 - `src/calculator.test.js`：Node 内置测试，覆盖公式、取整、边界和异常恢复。

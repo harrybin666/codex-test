@@ -1,2 +1,77 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#fff8ed"><meta name="description" content="用小鱼干时薪换算器，看看喜欢的东西需要打工多久。"><title>小鱼干时薪换算器</title></head><body><div id="app"></div><script type="module" src="/src/main.js"></script></body></html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#fff8ed">
+  <meta name="description" content="用小鱼干时薪换算器，看看喜欢的东西需要打工多久。">
+  <title>小鱼干时薪换算器</title>
+  <link rel="stylesheet" href="./src/styles.css">
+</head>
+<body>
+  <div id="app">
+    <main class="phone">
+      <header class="app-header">
+        <img src="./src/assets/door.png" class="door" alt="喵喵小屋">
+        <h1>小鱼干时薪换算器</h1>
+        <button id="edit-income" hidden type="button" class="edit-income" aria-label="编辑收入设置" aria-controls="income-settings">编辑</button>
+        <span id="nav-spacer" class="nav-spacer" aria-hidden="true"></span>
+      </header>
+      <section class="hero" aria-label="喵喵帮你算一算">
+        <div><p class="eyebrow">喵喵帮你算一算</p><h2>买下这份快乐<br>要搬多久的砖？</h2></div>
+        <div class="mascot"><img id="cat" src="./src/assets/cat.png" alt="抱着纸箱的黄色猫咪，粉色腮红"><span>喵，帮你算算～</span></div>
+      </section>
+      <form id="calculator-form" novalidate>
+        <section id="income-settings" class="panel income-panel">
+          <div class="section-title"><h2>我的收入</h2><span id="saved" class="saved" hidden></span></div>
+          <label for="salary" class="field-label">税前月薪 <span>元 / 月</span></label>
+          <div class="money"><span aria-hidden="true">¥</span><input id="salary" type="number" inputmode="decimal" placeholder="填写你的税前月薪" min="0.01" max="1000000" step="0.01"></div>
+          <p id="salary-error" class="error" hidden></p>
+          <div class="work-row"><span id="work-summary">22 天 / 月 · 8 小时 / 天</span><button id="toggle-work" type="button" aria-expanded="false" aria-controls="work-settings">调整工作时间 ⌄</button></div>
+          <div id="work-settings" class="work-settings" hidden>
+            <label for="days">每月工作天数<input id="days" type="number" inputmode="decimal" min="0.01" max="31" step="0.01"><span id="days-error" class="error" hidden></span></label>
+            <label for="hours">每天工作小时<input id="hours" type="number" inputmode="decimal" min="0.01" max="24" step="0.01"><span id="hours-error" class="error" hidden></span></label>
+            <button id="clear-settings" class="clear" type="button">清除收入设置</button>
+          </div>
+          <div class="hourly">你的每小时，价值 <strong id="current-rate">¥—</strong></div>
+          <button id="save-income" type="button" class="save-income" hidden>保存</button>
+        </section>
+        <section class="panel expense-panel">
+          <div class="section-title"><h2>想买点什么？</h2></div>
+          <div class="expense-fields">
+            <label for="name">或者买了什么<input id="name" maxlength="50" placeholder="例如：一杯奶茶"></label>
+            <label for="amount">金额（元）<input id="amount" type="number" inputmode="decimal" placeholder="15.00" min="0.01" max="1000000" step="0.01"></label>
+          </div>
+          <p id="name-error" class="error" hidden></p>
+          <p id="amount-error" class="error" hidden></p>
+        </section>
+        <button class="calculate" type="submit">要打工多久？<span aria-hidden="true">→</span></button>
+      </form>
+      <section class="result" aria-live="polite" aria-atomic="true">
+        <div class="result-header"><h2>本喵的换算小票</h2><span>单笔消费</span></div>
+        <div id="result-content" hidden>
+          <div class="comparison">
+            <div class="product"><span class="drink" aria-hidden="true">🛍️</span><p id="result-purchase"></p></div>
+            <span class="equals" aria-hidden="true">=</span>
+            <div class="time"><strong id="result-duration"></strong><p>你的打工时间</p></div>
+          </div>
+          <p id="result-speech" class="speech"></p>
+          <p id="result-disclaimer" class="disclaimer"></p>
+          <p id="stale" class="stale" hidden>输入已修改，请重新换算</p>
+        </div>
+        <div id="empty" class="empty"><span aria-hidden="true">🐾</span><p>填好收入与消费，本喵帮你算～</p><p class="disclaimer">每一份喜欢，都有时间的重量</p></div>
+      </section>
+      <button id="save-card" class="save" disabled>保存对比图</button>
+      <footer>把钱换成时间，把喜欢留给自己。</footer>
+      <div id="notice" class="toast" role="status" hidden></div>
+      <div id="image-preview" class="image-preview" hidden>
+        <p>对比图预览 · 可长按图片保存</p>
+        <img id="preview-image" alt="本次消费与打工时间对比图">
+        <button id="close-preview" type="button">收起预览</button>
+      </div>
+      <noscript>请启用浏览器 JavaScript，以使用收入保存、消费换算和图片导出功能。</noscript>
+    </main>
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
