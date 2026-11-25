@@ -6,13 +6,16 @@
   <meta name="theme-color" content="#fff8ed">
   <meta name="description" content="用小鱼干时薪换算器，看看喜欢的东西需要打工多久。">
   <title>小鱼干时薪换算器</title>
+  <script src="./src/native-bridge.js"></script>
   <link rel="stylesheet" href="./src/styles.css">
 </head>
 <body>
   <div id="app">
     <main class="phone">
       <header class="app-header">
-        <img src="./src/assets/door.png" class="door" alt="喵喵小屋">
+        <button id="close-page" type="button" class="close-page" aria-label="关闭页面" title="关闭页面">
+          <img src="./src/assets/door.png" class="door" alt="">
+        </button>
         <h1>小鱼干时薪换算器</h1>
         <button id="edit-income" hidden type="button" class="edit-income" aria-label="编辑收入设置" aria-controls="income-settings">编辑</button>
         <span id="nav-spacer" class="nav-spacer" aria-hidden="true"></span>
@@ -72,6 +75,9 @@
       <noscript>请启用浏览器 JavaScript，以使用收入保存、消费换算和图片导出功能。</noscript>
     </main>
   </div>
-  <script type="module" src="./src/main.js"></script>
+  <script defer src="./src/calculator.js"></script>
+  <script defer src="./src/assets/cat-data.js"></script>
+  <script defer src="./src/export-card.js"></script>
+  <script defer src="./src/main.js"></script>
 </body>
 </html>

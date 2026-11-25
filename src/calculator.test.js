@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { calculate, validNumber, loadSettings, STORAGE_KEY } from './calculator.js'
+import './calculator.js'
+const { calculate, validNumber, loadSettings, STORAGE_KEY } = globalThis.FishWageCalculator
 const base = { salary: 10560, days: 22, hours: 8, name: '奶茶' }
 test('换算分钟、工作天数和不足一分钟', () => {
   assert.equal(calculate({ ...base, amount: 25 }).duration, '25 分钟')

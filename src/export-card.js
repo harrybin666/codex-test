@@ -1,11 +1,13 @@
-import { catSpeech } from './calculator.js'
+;(function () {
+'use strict'
+const { catSpeech } = globalThis.FishWageCalculator
 function wrap(ctx, text, maxWidth) {
   const lines = []; let line = ''
   for (const char of text) { if (ctx.measureText(line + char).width > maxWidth && line) { lines.push(line); line = char } else line += char }
   if (line) lines.push(line)
   return lines
 }
-export async function exportCard(result, catUrl) {
+async function exportCard(result, catUrl) {
   await document.fonts.ready
   const image = new Image()
   image.src = catUrl
@@ -37,3 +39,5 @@ export async function exportCard(result, catUrl) {
   if (!blob) throw new Error('图片生成失败')
   return URL.createObjectURL(blob)
 }
+globalThis.FishWageExport = Object.freeze({ exportCard })
+})()

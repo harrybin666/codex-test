@@ -1,5 +1,7 @@
-import { calculate, catSpeech, defaults, loadSettings, STORAGE_KEY, validNumber, validSettings } from './calculator.js'
-import { exportCard } from './export-card.js'
+;(function () {
+'use strict'
+const { calculate, catSpeech, defaults, loadSettings, STORAGE_KEY, validNumber, validSettings } = globalThis.FishWageCalculator
+const { exportCard } = globalThis.FishWageExport
 
 const byId = id => document.getElementById(id)
 const incomeKeys = ['salary', 'days', 'hours']
@@ -22,6 +24,26 @@ function toast(message) {
   byId('notice').textContent = message
   byId('notice').hidden = false
   timer = setTimeout(() => { byId('notice').hidden = true }, 3200)
+}
+
+function closePage() {
+  const nativeFailure = () => toast('关闭失败，请使用 App 的返回按钮重试')
+  try {
+    if (globalThis.FishWageNative.closePage(nativeFailure)) return
+  } catch {
+    nativeFailure()
+    return
+  }
+  const manualClose = () => toast('浏览器未允许自动关闭，请手动关闭此标签页')
+  try {
+    window.close()
+  } catch {
+    manualClose()
+    return
+  }
+  setTimeout(() => {
+    if (!window.closed) manualClose()
+  }, 200)
 }
 
 function clearImage() {
@@ -147,7 +169,8 @@ async function saveCard() {
   renderResult()
   const snapshot = result
   try {
-    const url = await exportCard(snapshot, byId('cat').src)
+    // A data URL keeps Canvas export usable when index.html is opened via file://.
+    const url = await exportCard(snapshot, globalThis.FishWageCatImage)
     if (stale || result !== snapshot) {
       URL.revokeObjectURL(url)
       return
@@ -181,6 +204,7 @@ for (const key of incomeKeys) {
 }
 for (const key of ['name', 'amount']) byId(key).addEventListener('input', markChanged)
 byId('calculator-form').addEventListener('submit', submit)
+byId('close-page').addEventListener('click', closePage)
 byId('save-income').addEventListener('click', saveIncome)
 byId('edit-income').addEventListener('click', () => {
   editingIncome = true
@@ -217,3 +241,4 @@ byId('close-preview').addEventListener('click', () => {
 
 renderIncome()
 renderResult()
+})()
