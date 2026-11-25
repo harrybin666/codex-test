@@ -1,7 +1,7 @@
 ;(function () {
 'use strict'
 const { calculate, catSpeech, defaults, loadSettings, STORAGE_KEY, validNumber, validSettings } = globalThis.FishWageCalculator
-const { exportCard } = globalThis.FishWageExport
+const { exportCard, imageDataUrl } = globalThis.FishWageExport
 
 const byId = id => document.getElementById(id)
 const incomeKeys = ['salary', 'days', 'hours']
@@ -15,6 +15,7 @@ let expanded = false
 let result = null
 let stale = false
 let generating = false
+let savingToAlbum = false
 let imageUrl = ''
 let timer
 let saved = validSettings(income) ? '收入设置已保存' : ''
@@ -51,6 +52,8 @@ function clearImage() {
   byId('preview-image').removeAttribute('src')
   if (imageUrl) URL.revokeObjectURL(imageUrl)
   imageUrl = ''
+  byId('save-status').hidden = true
+  byId('save-status').textContent = ''
 }
 
 function renderIncome() {
@@ -75,11 +78,11 @@ function renderResult() {
   byId('empty').hidden = !!result
   byId('stale').hidden = !stale
   byId('save-card').disabled = !result || stale || generating
-  byId('save-card').textContent = generating ? '正在生成图片…' : '保存对比图'
+  byId('save-card').textContent = generating ? (savingToAlbum ? '正在保存到相册…' : '正在生成图片…') : '保存对比图'
   if (!result) return
   // User text is inserted as text, never parsed as HTML.
   byId('result-purchase').textContent = `${result.name} · ¥${result.amount.toFixed(2)}`
-  byId('result-duration').textContent = result.duration
+  byId('result-duration').textContent = result.duration.replace(/(\d+(?:\.\d+)?)\s+(天|小时|分钟)/g, '$1\u00a0$2')
   byId('result-duration').classList.toggle('long', result.duration.length > 7)
   byId('result-speech').textContent = catSpeech(result)
   byId('result-disclaimer').textContent = `按税前收入估算 · 1 天按工作 ${result.hours} 小时折算`
@@ -168,28 +171,51 @@ async function saveCard() {
   generating = true
   renderResult()
   const snapshot = result
+  let nativeSaving = false
+  function report(message) {
+    if (result === snapshot && !stale && imageUrl) {
+      byId('save-status').textContent = message
+      byId('save-status').hidden = false
+    }
+    toast(message)
+  }
   try {
     // A data URL keeps Canvas export usable when index.html is opened via file://.
-    const url = await exportCard(snapshot, globalThis.FishWageCatImage)
-    if (stale || result !== snapshot) {
-      URL.revokeObjectURL(url)
-      return
-    }
+    const blob = await exportCard(snapshot, globalThis.FishWageCatImage)
+    if (stale || result !== snapshot) return
     clearImage()
+    const url = URL.createObjectURL(blob)
     imageUrl = url
     byId('preview-image').src = url
     byId('image-preview').hidden = false
+    const platform = globalThis.FishWageNative.getPlatform()
+    if (platform === 'android') {
+      nativeSaving = true
+      savingToAlbum = true
+      renderResult()
+      const base64 = await imageDataUrl(blob)
+      if (stale || result !== snapshot) return
+      report('正在保存到相册，请按提示完成授权')
+      await globalThis.FishWageNative.saveImageToAlbum(base64)
+      report('本次对比图已保存到相册')
+      return
+    }
+    if (platform === 'ios') {
+      report('当前 App 暂不支持直接保存相册，请长按预览图片保存')
+      return
+    }
     const anchor = document.createElement('a')
     anchor.href = url
-    anchor.download = '小鱼干-消费对比.png'
+    anchor.download = '喵喵时薪秤-消费对比.png'
     document.body.append(anchor)
     anchor.click()
     anchor.remove()
-    toast('图片已生成；若未自动下载，可在预览中长按保存')
-  } catch {
-    toast('图片生成失败，请重试')
+    report('图片已生成；若未自动下载，可在预览中长按保存')
+  } catch (error) {
+    report(nativeSaving ? (error?.message || '保存失败，请重试或长按预览图片保存') : '图片生成失败，请重试')
   } finally {
     generating = false
+    savingToAlbum = false
     renderResult()
   }
 }
@@ -203,6 +229,20 @@ for (const key of incomeKeys) {
   })
 }
 for (const key of ['name', 'amount']) byId(key).addEventListener('input', markChanged)
+for (const [key, next] of [['name', 'amount'], ['days', 'hours']]) {
+  byId(key).addEventListener('keydown', event => {
+    if (event.key !== 'Enter' || event.isComposing) return
+    event.preventDefault()
+    byId(next).focus()
+  })
+}
+for (const key of ['salary', 'hours']) {
+  byId(key).addEventListener('keydown', event => {
+    if (event.key !== 'Enter' || event.isComposing) return
+    event.preventDefault()
+    saveIncome()
+  })
+}
 byId('calculator-form').addEventListener('submit', submit)
 byId('close-page').addEventListener('click', closePage)
 byId('save-income').addEventListener('click', saveIncome)

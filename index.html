@@ -2,10 +2,10 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#fff8ed">
-  <meta name="description" content="用小鱼干时薪换算器，看看喜欢的东西需要打工多久。">
-  <title>小鱼干时薪换算器</title>
+  <meta name="description" content="用喵喵时薪秤，看看喜欢的东西需要打工多久。">
+  <title>喵喵时薪秤</title>
   <script src="./src/native-bridge.js"></script>
   <link rel="stylesheet" href="./src/styles.css">
 </head>
@@ -16,7 +16,7 @@
         <button id="close-page" type="button" class="close-page" aria-label="关闭页面" title="关闭页面">
           <img src="./src/assets/door.png" class="door" alt="">
         </button>
-        <h1>小鱼干时薪换算器</h1>
+        <h1>喵喵时薪秤</h1>
         <button id="edit-income" hidden type="button" class="edit-income" aria-label="编辑收入设置" aria-controls="income-settings">编辑</button>
         <span id="nav-spacer" class="nav-spacer" aria-hidden="true"></span>
       </header>
@@ -28,12 +28,12 @@
         <section id="income-settings" class="panel income-panel">
           <div class="section-title"><h2>我的收入</h2><span id="saved" class="saved" hidden></span></div>
           <label for="salary" class="field-label">税前月薪 <span>元 / 月</span></label>
-          <div class="money"><span aria-hidden="true">¥</span><input id="salary" type="number" inputmode="decimal" placeholder="填写你的税前月薪" min="0.01" max="1000000" step="0.01"></div>
+          <div class="money"><span aria-hidden="true">¥</span><input id="salary" type="number" inputmode="decimal" enterkeyhint="done" placeholder="填写你的税前月薪" min="0.01" max="1000000" step="0.01"></div>
           <p id="salary-error" class="error" hidden></p>
           <div class="work-row"><span id="work-summary">22 天 / 月 · 8 小时 / 天</span><button id="toggle-work" type="button" aria-expanded="false" aria-controls="work-settings">调整工作时间 ⌄</button></div>
           <div id="work-settings" class="work-settings" hidden>
-            <label for="days">每月工作天数<input id="days" type="number" inputmode="decimal" min="0.01" max="31" step="0.01"><span id="days-error" class="error" hidden></span></label>
-            <label for="hours">每天工作小时<input id="hours" type="number" inputmode="decimal" min="0.01" max="24" step="0.01"><span id="hours-error" class="error" hidden></span></label>
+            <label for="days">每月工作天数<input id="days" type="number" inputmode="decimal" enterkeyhint="next" min="0.01" max="31" step="0.01"><span id="days-error" class="error" hidden></span></label>
+            <label for="hours">每天工作小时<input id="hours" type="number" inputmode="decimal" enterkeyhint="done" min="0.01" max="24" step="0.01"><span id="hours-error" class="error" hidden></span></label>
             <button id="clear-settings" class="clear" type="button">清除收入设置</button>
           </div>
           <div class="hourly">你的每小时，价值 <strong id="current-rate">¥—</strong></div>
@@ -42,8 +42,8 @@
         <section class="panel expense-panel">
           <div class="section-title"><h2>想买点什么？</h2></div>
           <div class="expense-fields">
-            <label for="name">或者买了什么<input id="name" maxlength="50" placeholder="例如：一杯奶茶"></label>
-            <label for="amount">金额（元）<input id="amount" type="number" inputmode="decimal" placeholder="15.00" min="0.01" max="1000000" step="0.01"></label>
+            <label for="name">或者买了什么<input id="name" enterkeyhint="next" maxlength="50" placeholder="例如：一杯奶茶"></label>
+            <label for="amount">金额（元）<input id="amount" type="number" inputmode="decimal" enterkeyhint="done" placeholder="15.00" min="0.01" max="1000000" step="0.01"></label>
           </div>
           <p id="name-error" class="error" hidden></p>
           <p id="amount-error" class="error" hidden></p>
@@ -69,6 +69,7 @@
       <div id="notice" class="toast" role="status" hidden></div>
       <div id="image-preview" class="image-preview" hidden>
         <p>对比图预览 · 可长按图片保存</p>
+        <p id="save-status" class="save-status" role="status" hidden></p>
         <img id="preview-image" alt="本次消费与打工时间对比图">
         <button id="close-preview" type="button">收起预览</button>
       </div>

@@ -25,7 +25,7 @@ async function exportCard(result, catUrl) {
   ctx.fillStyle = '#fff'; ctx.strokeStyle = '#292a24'; ctx.lineWidth = 4
   ctx.beginPath(); ctx.roundRect(35, 35, 680, height - 70, 28); ctx.fill(); ctx.stroke()
   ctx.fillStyle = '#ffd0df'; ctx.fillRect(38, 65, 674, 85)
-  ctx.textAlign = 'center'; ctx.fillStyle = '#292a24'; ctx.font = 'bold 30px sans-serif'; ctx.fillText('小鱼干 · 本喵的换算小票', 375, 120)
+  ctx.textAlign = 'center'; ctx.fillStyle = '#292a24'; ctx.font = 'bold 30px sans-serif'; ctx.fillText('喵喵时薪秤 · 本喵的换算小票', 375, 120)
   ctx.drawImage(image, 285, 180, 180, 145)
   let y = 375; ctx.font = '28px sans-serif'
   for (const line of names) { ctx.fillText(line, 375, y); y += 40 }
@@ -37,7 +37,20 @@ async function exportCard(result, catUrl) {
   ctx.font = '21px sans-serif'; ctx.fillStyle = '#797873'; ctx.fillText(`按税前收入估算 · 1 天按工作 ${result.hours} 小时折算`, 375, height - 90)
   const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'))
   if (!blob) throw new Error('图片生成失败')
-  return URL.createObjectURL(blob)
+  return blob
 }
-globalThis.FishWageExport = Object.freeze({ exportCard })
+
+function imageDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (typeof reader.result === 'string' && reader.result.startsWith('data:image/png;base64,')) resolve(reader.result)
+      else reject(new Error('图片读取失败，请重试'))
+    }
+    reader.onerror = reader.onabort = () => reject(new Error('图片读取失败，请重试'))
+    reader.readAsDataURL(blob)
+  })
+}
+
+globalThis.FishWageExport = Object.freeze({ exportCard, imageDataUrl })
 })()
