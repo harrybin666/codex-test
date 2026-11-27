@@ -64,7 +64,6 @@ function renderIncome() {
   byId('saved').textContent = saved === '收入设置已保存' ? `✓ ${saved}` : saved
   byId('work-settings').hidden = !expanded
   byId('toggle-work').setAttribute('aria-expanded', String(expanded))
-  byId('toggle-work').textContent = `调整工作时间 ${expanded ? '⌃' : '⌄'}`
   byId('work-summary').textContent = `${income.days || '—'} 天 / 月 · ${income.hours || '—'} 小时 / 天`
   const rate = validSettings(income)
     ? (Number(income.salary) / (Number(income.days) * Number(income.hours))).toFixed(2)
@@ -172,6 +171,11 @@ async function saveCard() {
   renderResult()
   const snapshot = result
   let nativeSaving = false
+  function revealPreview() {
+    if (result !== snapshot || stale || !imageUrl) return
+    const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
+    byId('image-preview').scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' })
+  }
   function report(message) {
     if (result === snapshot && !stale && imageUrl) {
       byId('save-status').textContent = message
@@ -188,6 +192,8 @@ async function saveCard() {
     imageUrl = url
     byId('preview-image').src = url
     byId('image-preview').hidden = false
+    await byId('preview-image').decode()
+    if (stale || result !== snapshot || imageUrl !== url) return
     const platform = globalThis.FishWageNative.getPlatform()
     if (platform === 'android') {
       nativeSaving = true
@@ -198,10 +204,12 @@ async function saveCard() {
       report('正在保存到相册，请按提示完成授权')
       await globalThis.FishWageNative.saveImageToAlbum(base64)
       report('本次对比图已保存到相册')
+      revealPreview()
       return
     }
     if (platform === 'ios') {
       report('当前 App 暂不支持直接保存相册，请长按预览图片保存')
+      revealPreview()
       return
     }
     const anchor = document.createElement('a')
@@ -211,6 +219,7 @@ async function saveCard() {
     anchor.click()
     anchor.remove()
     report('图片已生成；若未自动下载，可在预览中长按保存')
+    revealPreview()
   } catch (error) {
     report(nativeSaving ? (error?.message || '保存失败，请重试或长按预览图片保存') : '图片生成失败，请重试')
   } finally {

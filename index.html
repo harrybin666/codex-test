@@ -2,11 +2,12 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="theme-color" content="#fff8ed">
   <meta name="description" content="用喵喵时薪秤，看看喜欢的东西需要打工多久。">
   <title>喵喵时薪秤</title>
   <script src="./src/native-bridge.js"></script>
+  <script src="./src/viewport-lock.js"></script>
   <link rel="stylesheet" href="./src/styles.css">
 </head>
 <body>
@@ -30,7 +31,7 @@
           <label for="salary" class="field-label">税前月薪 <span>元 / 月</span></label>
           <div class="money"><span aria-hidden="true">¥</span><input id="salary" type="number" inputmode="decimal" enterkeyhint="done" placeholder="填写你的税前月薪" min="0.01" max="1000000" step="0.01"></div>
           <p id="salary-error" class="error" hidden></p>
-          <div class="work-row"><span id="work-summary">22 天 / 月 · 8 小时 / 天</span><button id="toggle-work" type="button" aria-expanded="false" aria-controls="work-settings">调整工作时间 ⌄</button></div>
+          <div class="work-row"><span id="work-summary">22 天 / 月 · 8 小时 / 天</span><button id="toggle-work" type="button" aria-expanded="false" aria-controls="work-settings"><span>调整工作时间</span><svg class="work-toggle-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 6L8 10L12 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
           <div id="work-settings" class="work-settings" hidden>
             <label for="days">每月工作天数<input id="days" type="number" inputmode="decimal" enterkeyhint="next" min="0.01" max="31" step="0.01"><span id="days-error" class="error" hidden></span></label>
             <label for="hours">每天工作小时<input id="hours" type="number" inputmode="decimal" enterkeyhint="done" min="0.01" max="24" step="0.01"><span id="hours-error" class="error" hidden></span></label>

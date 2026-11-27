@@ -12,9 +12,10 @@ const image = 'data:image/png;base64,aW1hZ2U='
 
 function loadApp(platform, exportCard = async () => ({ type: 'image/png' })) {
   const nodes = new Map([...html.matchAll(/\bid="([^"]+)"/g)].map(([, id]) => [id, {
-    hidden: false, value: '', textContent: '', handlers: {}, classList: { toggle() {} },
+    hidden: false, value: '', textContent: '', handlers: {}, scrollCalls: [], classList: { toggle() {} },
     addEventListener(type, handler) { this.handlers[type] = handler },
-    setAttribute() {}, removeAttribute() {}, focus() {}
+    setAttribute() {}, removeAttribute() {}, focus() {}, async decode() {},
+    scrollIntoView(options) { this.scrollCalls.push(options) }
   }]))
   const messages = []
   let downloads = 0
@@ -61,6 +62,7 @@ test('保存按钮等待 Android 回调期间禁用，成功后提示相册保�
   assert.equal(app.nodes.get('save-card').disabled, true)
   assert.equal(app.nodes.get('save-card').textContent, '正在保存到相册…')
   assert.equal(app.nodes.get('image-preview').hidden, false)
+  assert.equal(app.nodes.get('image-preview').scrollCalls.length, 0)
   assert.ok(!app.nodes.get('save-status').textContent.includes('已保存'))
   await app.save()
   assert.equal(app.messages.length, 1)
@@ -68,6 +70,8 @@ test('保存按钮等待 Android 回调期间禁用，成功后提示相册保�
   await saving
   assert.equal(app.nodes.get('save-card').disabled, false)
   assert.equal(app.nodes.get('save-status').textContent, '本次对比图已保存到相册')
+  assert.equal(app.nodes.get('image-preview').scrollCalls.length, 1)
+  assert.equal(app.nodes.get('image-preview').scrollCalls[0].block, 'start')
   assert.equal(app.downloads(), 0)
 })
 
@@ -81,6 +85,7 @@ test('权限被拒绝时保留图片预览，明确显示权限原因且不自�
   assert.match(app.nodes.get('save-status').textContent, /未获得相册或存储权限/)
   assert.equal(app.nodes.get('save-card').disabled, false)
   assert.equal(app.downloads(), 0)
+  assert.equal(app.nodes.get('image-preview').scrollCalls.length, 0)
 })
 
 test('没有收到客户端回调时不显示保存成功，提示先查看相册', async () => {
@@ -99,12 +104,14 @@ test('普通浏览器仍下载 PNG，iOS 保留预览且不发送未知客户端
   await browser.save()
   assert.equal(browser.downloads(), 1)
   assert.equal(browser.reads(), 0)
+  assert.equal(browser.nodes.get('image-preview').scrollCalls.length, 1)
   const ios = loadApp('ios')
   await ios.save()
   assert.equal(ios.nodes.get('image-preview').hidden, false)
   assert.match(ios.nodes.get('save-status').textContent, /暂不支持直接保存相册/)
   assert.equal(ios.messages.length, 0)
   assert.equal(ios.downloads(), 0)
+  assert.equal(ios.nodes.get('image-preview').scrollCalls.length, 1)
 })
 
 test('图片生成期间修改消费，不发送旧结果到客户端', async () => {
@@ -118,4 +125,21 @@ test('图片生成期间修改消费，不发送旧结果到客户端', async ()
   assert.equal(app.messages.length, 0)
   assert.equal(app.downloads(), 0)
   assert.equal(app.nodes.get('save-card').disabled, true)
+  assert.equal(app.nodes.get('image-preview').scrollCalls.length, 0)
+})
+
+test('减少动态效果时直接定位到预览，保存期间修改输入则不自动跳转', async () => {
+  const browser = loadApp('browser')
+  browser.window.matchMedia = () => ({ matches: true })
+  await browser.save()
+  assert.equal(browser.nodes.get('image-preview').scrollCalls[0].behavior, 'auto')
+
+  const android = loadApp('android')
+  const saving = android.save()
+  await setImmediate()
+  android.nodes.get('amount').value = '30'
+  android.nodes.get('amount').handlers.input()
+  android.window.onSuccessCallback({ ...android.messages[0], data: { code: 200 } })
+  await saving
+  assert.equal(android.nodes.get('image-preview').scrollCalls.length, 0)
 })
